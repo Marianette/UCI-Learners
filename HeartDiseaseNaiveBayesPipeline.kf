@@ -1,0 +1,184 @@
+{
+	"flow_name" : "HeartDiseaseNaiveBayesPipeline",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.Loader",
+			"properties" : {
+				"loader" : {
+					"type" : "loader",
+					"class" : "weka.core.converters.ArffLoader",
+					"filePath" : "C:/Users/Maria/Documents/01 COMP309/Assignment 1/processed.cleveland.csv.arff",
+					"useRelativePath" : false
+				},
+				"name" : "ArffLoader"
+			},
+			"connections" : {
+				"dataSet" : [
+					"NumericToNominal"
+				]
+			},
+			"coordinates" : "37,380"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Filter",
+			"properties" : {
+				"filter" : {
+					"type" : "optionHandler",
+					"class" : "weka.filters.unsupervised.attribute.NumericToNominal",
+					"options" : "-R 3,7,11-14"
+				},
+				"name" : "NumericToNominal"
+			},
+			"connections" : {
+				"dataSet" : [
+					"NumericToBinary"
+				]
+			},
+			"coordinates" : "151,382"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Filter",
+			"properties" : {
+				"filter" : {
+					"type" : "optionHandler",
+					"class" : "weka.filters.unsupervised.attribute.NumericToBinary",
+					"options" : "-R 2,6,9"
+				},
+				"name" : "NumericToBinary"
+			},
+			"connections" : {
+				"dataSet" : [
+					"ClassAssigner"
+				]
+			},
+			"coordinates" : "264,383"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.CrossValidationFoldMaker",
+			"properties" : {
+				"name" : "CrossValidationFoldMaker",
+				"numFolds" : "5",
+				"preserveOrder" : false,
+				"seed" : "1"
+			},
+			"connections" : {
+				"trainingSet" : [
+					"NaiveBayes"
+				],
+				"testSet" : [
+					"NaiveBayes"
+				]
+			},
+			"coordinates" : "603,384"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Classifier",
+			"properties" : {
+				"classifier" : {
+					"type" : "optionHandler",
+					"class" : "weka.classifiers.bayes.NaiveBayes",
+					"options" : ""
+				},
+				"loadClassifierFileName" : "",
+				"name" : "NaiveBayes",
+				"resetIncrementalClassifier" : false,
+				"updateIncrementalClassifier" : true
+			},
+			"connections" : {
+				"batchClassifier" : [
+					"ClassifierPerformanceEvaluator"
+				],
+				"text" : [
+					"NaiveBayesFolds"
+				]
+			},
+			"coordinates" : "758,384"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ClassifierPerformanceEvaluator",
+			"properties" : {
+				"costMatrixString" : "",
+				"errorPlotPointSizeProportionalToMargin" : false,
+				"evaluateWithRespectToCosts" : false,
+				"evaluationMetricsToOutput" : "Correct,Incorrect,Kappa,Total cost,Average cost,KB relative,KB information,Correlation,Complexity 0,Complexity scheme,Complexity improvement,MAE,RMSE,RAE,RRSE,TP rate,FP rate,Precision,Recall,F-measure,MCC,ROC area,PRC area",
+				"name" : "ClassifierPerformanceEvaluator"
+			},
+			"connections" : {
+				"text" : [
+					"NaiveBayesOutput"
+				],
+				"thresholdData" : [
+					"NaiveBayesModelPC"
+				]
+			},
+			"coordinates" : "948,383"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "NaiveBayesFolds"
+			},
+			"connections" : {
+			},
+			"coordinates" : "849,523"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ModelPerformanceChart",
+			"properties" : {
+				"name" : "NaiveBayesModelPC",
+				"offscreenAdditionalOpts" : "${java.awt.graphicsenv}",
+				"offscreenHeight" : "400",
+				"offscreenRendererName" : "Weka Chart Renderer",
+				"offscreenWidth" : "500",
+				"offscreenXAxis" : "",
+				"offscreenYAxis" : ""
+			},
+			"connections" : {
+			},
+			"coordinates" : "1033,519"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "NaiveBayesOutput"
+			},
+			"connections" : {
+			},
+			"coordinates" : "1125,382"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Filter",
+			"properties" : {
+				"filter" : {
+					"type" : "optionHandler",
+					"class" : "weka.filters.supervised.instance.SpreadSubsample",
+					"options" : "-M 0.0 -X 0.0 -S 1"
+				},
+				"name" : "SpreadSubsample"
+			},
+			"connections" : {
+				"dataSet" : [
+					"CrossValidationFoldMaker"
+				]
+			},
+			"coordinates" : "487,384"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Filter",
+			"properties" : {
+				"filter" : {
+					"type" : "optionHandler",
+					"class" : "weka.filters.unsupervised.attribute.ClassAssigner",
+					"options" : "-C last"
+				},
+				"name" : "ClassAssigner"
+			},
+			"connections" : {
+				"dataSet" : [
+					"SpreadSubsample"
+				]
+			},
+			"coordinates" : "377,383"
+		}
+	]
+}
